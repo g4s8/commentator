@@ -1,0 +1,17 @@
+[package]
+name = "commentator"
+version = "0.0.1"
+edition = "2018"
+license = "MIT"
+description = "Source code comments extractor binary and SDK"
+
+[lib]
+name = "commentator"
+path = "src/lib.rs"
+
+[[bin]]
+name = "commentator"
+path = "src/bin.rs"
+
+[dependencies]
+unicode-segmentation = "1.8.0"
