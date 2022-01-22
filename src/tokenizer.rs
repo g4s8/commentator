@@ -40,13 +40,14 @@ pub struct Comment {
     pub start: usize,
     pub text: String,
     inline: bool,
+    complete: bool,
 }
 
 impl Comment {
     fn new() -> Self {
         Comment{
             text: String::new(),
-            line: 0, start: 0, inline: false,
+            line: 0, start: 0, inline: false, complete: false,
         }
     }
 
@@ -102,10 +103,10 @@ impl<S: Spec> Tokenizer<S> {
                         self.last.inline = true;
                     } else {
                         // we continue previous single-line comment
-                        self.result.pop();
+                        self.result.remove(0);
                     }
                     self.last.write(tail[o..].as_ref());
-                    self.result.push(self.last.clone());
+                    self.result.insert(0, self.last.clone());
                     break;
                 }
             }
@@ -120,7 +121,7 @@ impl<S: Spec> Tokenizer<S> {
                         } else {
                             panic!("string tail is not a substring!Oo");
                         }
-                        self.result.push(self.last.clone());
+                        self.result.insert(0, self.last.clone());
                         self.comment = false;
                         for _ in 1..o {
                             iter.next();
@@ -179,7 +180,7 @@ impl<S: Spec> Tokenizer<S> {
                         self.result.pop();
                     }
                     self.last.write(buf[i+o..].as_ref());
-                    self.result.push(self.last.clone());
+                    self.result.insert(0, self.last.clone());
                     break;
                 }
             }
@@ -189,7 +190,7 @@ impl<S: Spec> Tokenizer<S> {
                     // println!("debug: check comment end: {}", sub_ref);
                     if let Some(o) = self.spec.is_end(sub_ref) {
                         self.last.write(tail[..sub].as_ref());
-                        self.result.push(self.last.clone());
+                        self.result.insert(0, self.last.clone());
                         // println!("debug: comment found: {}", self.last);
                         self.comment = false;
                         i += sub+o;
@@ -209,7 +210,14 @@ impl<S: Spec> Tokenizer<S> {
         }
     }
 
+    pub fn finish(&mut self) {
+        self.result.insert(0, Comment::new())
+    }
+
     pub fn take(&mut self) -> Option<Comment> {
-        return self.result.pop();
+        if self.result.len() > 1 {
+            return self.result.pop();
+        }
+        None
     }
 }

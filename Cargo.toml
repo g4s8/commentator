@@ -5,6 +5,13 @@ edition = "2018"
 license = "MIT"
 description = "Source code comments extractor binary and SDK"
 
+[dependencies]
+unicode-segmentation = "1.8.0"
+json = { version = "0.12.4", optional = true }
+
+[features]
+feat-bin = ["json"]
+
 [lib]
 name = "commentator"
 path = "src/lib.rs"
@@ -12,6 +19,4 @@ path = "src/lib.rs"
 [[bin]]
 name = "commentator"
 path = "src/bin.rs"
-
-[dependencies]
-unicode-segmentation = "1.8.0"
+required-features = ["feat-bin"]

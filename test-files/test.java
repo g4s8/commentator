@@ -24,10 +24,10 @@ class Foo { // COMMENT-12
      */ /* COMMENT-16*/ /* COMMENT-17 */
     public void baz(/*COMMENT-18*/int x, /*COMMENT-19*/ int y) { // COMMENT-20
         /* COMMENT-21 */ // COMMENT-22
-        // COMMENT-23 /* NOT_A_COMMENT */
-        // COMMENT-23.1 /** NOT_A_COMMENT */
-        /* русский комментарий COMMENT-24 */
+        // COMMENT-22.1 /* NOT_A_COMMENT */
+        // COMMENT-22.2 /** NOT_A_COMMENT */
+        /* русский комментарий COMMENT-23 */
         System.out.println("❤\n!");
-        // नमस्ते COMMENT-25
+        // नमस्ते COMMENT-24
     }
 }
