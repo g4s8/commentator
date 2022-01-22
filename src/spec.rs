@@ -13,6 +13,8 @@ pub trait Spec {
     fn is_end(&self, src: &str) -> Option<usize>;
 
     fn is_inline(&self, src: &str) -> Option<usize>;
+
+    fn trim<'a>(&self, src: &'a str) -> &'a str;
 }
 
 pub struct Java {}
@@ -49,6 +51,16 @@ impl Spec for Java {
             None
         }
     }
+
+    fn trim<'a>(&self, src: &'a str) -> &'a str {
+        if src.starts_with("*") {
+            src[1..].as_ref()
+        } else if src.starts_with("//") {
+            src[2..].as_ref()
+        } else {
+            src
+        }
+    }
 }
 
 impl Spec for HTML {
@@ -75,6 +87,10 @@ impl Spec for HTML {
     fn is_inline(&self, _: &str) -> Option<usize> {
         None
     }
+
+    fn trim<'a>(&self, src: &'a str) -> &'a str {
+        src
+    }
 }
 
 impl Spec for Bash {
@@ -95,6 +111,14 @@ impl Spec for Bash {
             Some(1)
         } else {
             None
+        }
+    }
+
+    fn trim<'a>(&self, src: &'a str) -> &'a str {
+        if src.starts_with("#") {
+            src[1..].as_ref()
+        } else {
+            src
         }
     }
 }

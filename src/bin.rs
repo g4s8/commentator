@@ -13,7 +13,7 @@ fn main() -> std::io::Result<()> {
     let mut reader = my_reader::BufReader::open(args[1].as_str())?;
     let mut buffer = String::new();
     let spec = spec::Java::new();
-    let mut tkn = Tokenizer::new(spec);
+    let mut tkn = Tokenizer::new(&spec);
     let mut out = output::JSON::new();
     while let Ok(num) = reader.read_line(&mut buffer) {
         if num == 0 {
@@ -21,12 +21,14 @@ fn main() -> std::io::Result<()> {
         }
         let line = buffer.as_str();
         tkn.update(num, line);
-        while let Some(cmt) = tkn.take() {
+        while let Some(mut cmt) = tkn.take() {
+            cmt.trim(&spec);
             out.write(cmt);
         }
     }
     tkn.finish();
-    if let Some(cmt) = tkn.take() {
+    if let Some(mut cmt) = tkn.take() {
+        cmt.trim(&spec);
         out.write(cmt);
     }
     out.flush();

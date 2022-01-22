@@ -27,8 +27,8 @@ use unicode_segmentation::UnicodeSegmentation;
 /// assert_eq!(cmt.unwrap().text, "\n * Entry point.\n ");
 /// assert!(t.take().is_none());
 /// ```
-pub struct Tokenizer<S> where S: Spec {
-    spec: S,
+pub struct Tokenizer<'a, S> where S: Spec {
+    spec: &'a S,
     result: Vec<Comment>,
     comment: bool,
     last: Comment,
@@ -41,6 +41,23 @@ pub struct Comment {
     pub text: String,
     inline: bool,
     complete: bool,
+}
+
+fn lines_ws_offset(lines: &Vec<&str>) -> usize {
+    let mut lo = 0;
+    for (n, l) in lines.iter().enumerate() {
+        let mut cnt = 0;
+        while l[cnt..].starts_with(" ") {
+            cnt += 1;
+        }
+        if n == 0 || cnt < lo {
+            lo = cnt;
+        }
+        if lo == 0 {
+            break;
+        }
+    }
+    lo
 }
 
 impl Comment {
@@ -61,10 +78,62 @@ impl Comment {
     fn write(&mut self, buf: &str) {
         self.text.push_str(buf);
     }
+
+    pub fn trim(&mut self, spec: &impl Spec) {
+        let mut lines = Vec::new();
+
+        // 1) split comment by newlines, skip empty or whitespace lines
+        // in the beginning, remove trailing whitespaces and add lines to
+        // array.
+        for l in self.text.split("\n") {
+            if lines.is_empty() && l.is_empty() {
+                // skip first empty lines
+                continue;
+            }
+            lines.push(l.trim_end());
+        }
+
+        // 2) remove empty or whitespace lines from the end
+        while let Some(l) = lines.last() {
+            if l.is_empty() {
+                lines.truncate(lines.len() - 1);
+            } else {
+                break;
+            }
+        }
+
+        // 3) calculate if we the comment is canonical: if whitespace count on
+        // each line is bigger that offset of openning comment literal, than we
+        // can trim these whitespaces. If any line doesn't have enough spaces, then
+        // we can't trim the whole comment. If we can - then remove whitespaces from
+        // the beginning of line.
+        let offset = lines_ws_offset(&lines);
+        if offset > 0 {
+            for l in lines.iter_mut() {
+                *l = l[offset..].as_ref();
+            }
+        }
+
+        // 4) trim based on language comments specification, e.g. remove `*` chars
+        // for Java comments.
+        for l in lines.iter_mut() {
+            *l = spec.trim(l);
+        }
+
+        // 5) calculate minimal offset of whitespaces for each line and trim each line by
+        // this offset if it's > 0.
+        let offset = lines_ws_offset(&lines);
+        if offset > 0 {
+            for l in lines.iter_mut() {
+                *l = l[offset..].as_ref();
+            }
+        }
+        self.text = lines.join("\n");
+    }
 }
 
-impl<S: Spec> Tokenizer<S> {
-    pub fn new(spec: S) -> Self {
+impl<'a, S: Spec> Tokenizer<'a, S> {
+    pub fn new(spec: &'a S) -> Self {
         let r = Vec::new();
         Tokenizer{
             spec,
@@ -85,7 +154,7 @@ impl<S: Spec> Tokenizer<S> {
                 // then begin new comment.
                 if let Some(o) = self.spec.is_begin(tail) {
                     self.comment = true;
-                    self.last.begin(line, cnt+o);
+                    self.last.begin(line, cnt);
                     cnt += o;
                     for _ in 1..o {
                         iter.next();
