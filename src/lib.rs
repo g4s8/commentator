@@ -21,13 +21,14 @@ mod test {
 
     #[test]
     fn tokenizer_test() {
-        let mut t = Tokenizer::new(spec::Java::new());
+        let mut t = Tokenizer::new(&spec::StandardSpec::C);
         t.update(1, "/*\n");
         t.update(2, " * Entry point.\n");
         t.update(3, " */\n");
         t.update(4, "public static void main(String... args) {\n");
         t.update(5, "  System.out.println(\"hello world\");\n");
         t.update(6, "}\n");
+        t.finish();
         let cmt = t.take();
         assert!(cmt.is_some());
         assert_eq!(cmt.unwrap().text, "\n * Entry point.\n ");
@@ -36,7 +37,7 @@ mod test {
 
     #[test]
     fn spec_java_detect_comment() {
-        let s = &spec::Java::new();
+        let s = &spec::StandardSpec::C;
         test_begin(s, "/* comment", 2);
         test_begin(s, "/** comment", 3);
         test_end(s, "*/", 2);
@@ -45,14 +46,14 @@ mod test {
 
     #[test]
     fn spec_html_detect_comments() {
-        let s = &spec::HTML::new();
+        let s = &spec::StandardSpec::HTML;
         test_begin(s, "<!-- comment", 4);
         test_end(s, "-->", 3);
     }
 
     #[test]
     fn spec_bash_detect_comment() {
-        let s = &spec::Bash::new();
+        let s = &spec::StandardSpec::Bash;
         test_inline(s, "# comment", 1);
     }
 

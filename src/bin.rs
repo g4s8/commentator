@@ -1,20 +1,41 @@
-use std::env;
 use commentator::Tokenizer;
-use commentator::spec::{self, Spec};
-use output::Writer;
+use commentator::spec::{self, StandardSpec};
+use argparse::{ArgumentParser, StoreTrue, Store};
+use std::str::FromStr;
 
 fn main() -> std::io::Result<()> {
-    let args: Vec<String> = env::args().collect();
-
-    if args.len() < 2 {
-        panic!("filename required");
+    let mut format = String::new();
+    let mut lang = String::new();
+    let mut trim = false;
+    let mut file = String::new();
+    {
+        let mut ap = ArgumentParser::new();
+        ap.set_description("Extract comments from source file");
+        ap.refer(&mut format)
+            .add_option(&["--format"], Store, "output format (plain|json)");
+        ap.refer(&mut lang)
+            .add_option(&["--lang"], Store, "comment language specification: (java|bash|html)");
+        ap.refer(&mut trim)
+            .add_option(&["--trim"], StoreTrue, "trim comments flag");
+        ap.refer(&mut file)
+            .add_argument("file", Store, "file to parse");
+        ap.parse_args_or_exit();
     }
 
-    let mut reader = my_reader::BufReader::open(args[1].as_str())?;
+    let spec = match lang.as_str() {
+        "c" | "java" | "go" | "cpp "=> StandardSpec::C,
+        "bash" | "sh" | "ruby" => StandardSpec::Bash,
+        "html" | "xml" => StandardSpec::HTML,
+        "rust" => StandardSpec::Rust,
+        _ => panic!("unknown language type: `{}`", lang),
+    };
+
+    let mut reader = my_reader::BufReader::open(file.as_str())?;
     let mut buffer = String::new();
-    let spec = spec::Java::new();
     let mut tkn = Tokenizer::new(&spec);
-    let mut out = output::JSON::new();
+    let mut out = output::Format::from_str(format.as_str()).unwrap();
+    out.begin();
+    let mut pos = 0;
     while let Ok(num) = reader.read_line(&mut buffer) {
         if num == 0 {
             break;
@@ -22,16 +43,22 @@ fn main() -> std::io::Result<()> {
         let line = buffer.as_str();
         tkn.update(num, line);
         while let Some(mut cmt) = tkn.take() {
-            cmt.trim(&spec);
-            out.write(cmt);
+            if trim {
+                cmt.trim(&spec);
+            }
+            out.write(pos, cmt);
+            pos += 1;
         }
     }
     tkn.finish();
     if let Some(mut cmt) = tkn.take() {
-        cmt.trim(&spec);
-        out.write(cmt);
+        if trim {
+            cmt.trim(&spec);
+        }
+        out.write(pos, cmt);
+        pos += 1;
     }
-    out.flush();
+    out.end();
 
     Ok(())
 }
@@ -39,55 +66,66 @@ fn main() -> std::io::Result<()> {
 mod output {
     use commentator::Comment;
     use json;
+    use std::{error::Error, fmt, str::FromStr};
 
-    pub trait Writer {
-        fn new() -> Self;
-        fn write(&mut self, cmt: Comment);
-        fn flush(&self);
+    #[derive(Debug)]
+    pub struct ParseFormatErr {
+        msg: String
     }
 
-    pub struct Plain {
-        buf: String
-    }
+    impl Error for ParseFormatErr {}
 
-    pub struct JSON {
-        arr: json::JsonValue,
-    }
-
-    impl Writer for Plain {
-        fn new() -> Self {
-            Plain{buf: String::new()}
-        }
-
-        fn write(&mut self, cmt: Comment) {
-            self.buf.push_str(format!("{}:{}: '{}'", cmt.line, cmt.start, cmt.text).as_str());
-        }
-
-        fn flush(&self) {
-            println!("{}", self.buf);
+    impl fmt::Display for ParseFormatErr {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "format parse error: {}. Supported format options are `plain` or `json`",
+                self.msg)
         }
     }
 
-    impl Writer for JSON {
-        fn new() -> Self {
-           JSON{arr: json::JsonValue::new_array()}
-        }
+    pub enum Format {
+        Plain,
+        JSON,
+    }
 
-        fn write(&mut self, cmt: Comment) {
-            let item = json::object!{
-                "line" => cmt.line,
-                "start" => cmt.start,
-                "body" => cmt.text,
-            };
-            if let Err(e) = self.arr.push(item) {
-                panic!("Error: {}", e);
+    impl Format {
+        pub fn write(&mut self, pos: usize, cmt: Comment) {
+            match self {
+                Format::Plain => println!("[{}]{}:{}: '{}'", pos, cmt.line, cmt.start, cmt.text),
+                Format::JSON => println!("{}{}", if pos > 0 { "," } else { "" }, json::object!{
+                    "line" => cmt.line,
+                    "start" => cmt.start,
+                    "body" => cmt.text,
+                }),
             }
         }
 
-        fn flush(&self) {
-            println!("{}", self.arr);
+        pub fn begin(&self) {
+            match self {
+                Format::JSON => println!("["),
+                _ => (),
+            }
+        }
+
+        pub fn end(&self) {
+            match self {
+                Format::JSON => println!("]"),
+                _ => (),
+            }
         }
     }
+
+    impl FromStr for Format {
+        type Err = ParseFormatErr;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            match s {
+                "json" => Ok(Format::JSON),
+                "plain" => Ok(Format::Plain),
+                _ => Err(ParseFormatErr{msg: format!("unknown option `{}`", s)})
+            }
+        }
+    }
+
 }
 
 // https://stackoverflow.com/questions/45882329/read-large-files-line-by-line-in-rust

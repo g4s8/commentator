@@ -1,0 +1,25 @@
+on: [push, pull_request]
+name: Check
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: "Build lib"
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --lib
+      - name: "Test lib"
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --lib
+      - name: "Build bin"
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --bin commentator --features feat-bin

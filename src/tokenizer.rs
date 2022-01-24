@@ -22,6 +22,7 @@ use unicode_segmentation::UnicodeSegmentation;
 /// t.update(4, "public static void main(String... args) {\n");
 /// t.update(5, "  System.out.println(\"hello world\");\n");
 /// t.update(6, "}\n");
+/// t.finish();
 /// let cmt = t.take();
 /// assert!(cmt.is_some());
 /// assert_eq!(cmt.unwrap().text, "\n * Entry point.\n ");
@@ -79,7 +80,7 @@ impl Comment {
         self.text.push_str(buf);
     }
 
-    pub fn trim(&mut self, spec: &impl Spec) {
+    pub fn trim<'a, S: Spec>(&mut self, spec: &'a S) {
         let mut lines = Vec::new();
 
         // 1) split comment by newlines, skip empty or whitespace lines

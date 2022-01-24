@@ -16,7 +16,20 @@ This library could be used as CLI or from code.
 
 ## CLI usage
 
-./commentator filename.java
+`commentator` require file name argument and supports these options:
+ - `--format` - output format: either `plain` or `json`
+ - `--lang` - language comment specification, one of:
+   - `c`,`java`, `go`, `cpp` - for C-like comment syntax
+   - `rust` - Rust comments syntax
+   - `bash` - for Bash, Python and Ruby
+   - `html` - for HTML, XML
+ - `--trim` - trim comment symbols and whitespaces, align to the first
+   sentence indent.
+
+Example:
+```bash
+./commentator --format=json --lang=java filename.java
+```
 
 ## SDK usage
 
