@@ -4,6 +4,8 @@ Commentator is a fucking fast source code comments finder CLI and Rust SDK (crat
 
 [![Check](https://github.com/g4s8/commentator/actions/workflows/check.yml/badge.svg)](https://github.com/g4s8/commentator/actions/workflows/check.yml)
 
+[Crates v0.1.0](https://crates.io/crates/commentator)
+
 # Motivation
 
 Existing source code comments extractors (see References) forcomments extracting are quite slow,
@@ -24,6 +26,8 @@ cargo build --release --bin commentator --features feat-bin
 # move binary to your $PATH
 sudo mv ./target/release/commentator /usr/local/bin
 ```
+
+Or download from release pages: https://github.com/g4s8/commentator/releases/tag/0.1.0
 
 ## CLI usage
 
