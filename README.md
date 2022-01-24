@@ -2,7 +2,7 @@ Commentator is a fucking fast source code comments finder CLI and Rust SDK (crat
 
 **work in progress.**
 
-TODO: badges
+[![Check](https://github.com/g4s8/commentator/actions/workflows/check.yml/badge.svg)](https://github.com/g4s8/commentator/actions/workflows/check.yml)
 
 # Motivation
 
@@ -13,6 +13,17 @@ SDK. This tool fixes all of this.
 # Usage
 
 This library could be used as CLI or from code.
+
+To build CLI from sources (you need Rust and Cargo installed):
+```bash
+# clone repo
+git clone https://github.com/g4s8/commentator.git
+cd commentator
+# build with cargo
+cargo build --release --bin commentator --features feat-bin
+# move binary to your $PATH
+sudo mv ./target/release/commentator /usr/local/bin
+```
 
 ## CLI usage
 
