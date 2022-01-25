@@ -1,0 +1,25 @@
+on: [push]
+name: Release
+jobs:
+  release_bin:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+          - x86_64-pc-windows-gnu
+          - x86_64-apple-darwin
+          - armv7-unknown-linux-gnueabi
+          - armv7-unknown-linux-musleabi
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+      - name: "Build bin"
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --target=${{ matrix.target }} --bin commentator --features feat-bin
