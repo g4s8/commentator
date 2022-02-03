@@ -3,8 +3,8 @@ Commentator is a fucking fast source code comments finder CLI and Rust SDK (crat
 **work in progress.**
 
 [![Check](https://github.com/g4s8/commentator/actions/workflows/check.yml/badge.svg)](https://github.com/g4s8/commentator/actions/workflows/check.yml)
-
-[Crates v0.1.0](https://crates.io/crates/commentator)
+[![GitHub release (latest by date)](https://img.shields.io/github/downloads/g4s8/commentator/latest/total?label=download%40latest)](https://github.com/g4s8/commentator/releases/latest)
+[![Crates.io (latest)](https://img.shields.io/crates/dv/commentator?label=crates.io%40latest)](https://crates.io/crates/commentator)
 
 # Motivation
 
@@ -13,6 +13,9 @@ not always accurate (don't find all comments) or doesn't provide
 SDK. This tool fixes all of this.
 
 # Usage
+
+ - Get crate: [crates.io/crates/commentator](https://crates.io/crates/commentator)
+ - Get CLI: [releases@latest](https://github.com/g4s8/commentator/releases/latest)
 
 This library could be used as CLI or from code.
 
