@@ -11,6 +11,12 @@ jobs:
       - name: "Set version"
         run: |
           sed '0,/version/s/version = .*/version = "${{ env.RELEASE_VERSION }}"/' -i Cargo.toml
+      - name: "Check package"
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+      - name: "Commit version"
+        run: |
           git config --global user.name 'Release Action'
           git config --global user.email 'g4s8.public@gmail.com'
           git add Cargo.toml Cargo.lock
