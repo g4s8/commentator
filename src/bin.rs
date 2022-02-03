@@ -1,5 +1,5 @@
 use commentator::Tokenizer;
-use commentator::spec::{self, StandardSpec};
+use commentator::spec::StandardSpec;
 use argparse::{ArgumentParser, StoreTrue, Store};
 use std::str::FromStr;
 
@@ -56,7 +56,6 @@ fn main() -> std::io::Result<()> {
             cmt.trim(&spec);
         }
         out.write(pos, cmt);
-        pos += 1;
     }
     out.end();
 

@@ -41,7 +41,6 @@ pub struct Comment {
     pub start: usize,
     pub text: String,
     inline: bool,
-    complete: bool,
 }
 
 fn lines_ws_offset(lines: &Vec<&str>) -> usize {
@@ -65,7 +64,7 @@ impl Comment {
     fn new() -> Self {
         Comment{
             text: String::new(),
-            line: 0, start: 0, inline: false, complete: false,
+            line: 0, start: 0, inline: false,
         }
     }
 
