@@ -1,25 +1,35 @@
-on: [push]
+on:
+  push:
+    tags: "*"
 name: Release
 jobs:
   release_bin:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target:
-          - x86_64-unknown-linux-gnu
-          - x86_64-unknown-linux-musl
-          - x86_64-pc-windows-gnu
-          - x86_64-apple-darwin
-          - armv7-unknown-linux-gnueabi
-          - armv7-unknown-linux-musleabi
     steps:
       - uses: actions/checkout@v2
+      - run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: "Set version"
+        run: |
+          sed '0,/version/s/version = .*/version = "${{ env.RELEASE_VERSION }}"/' -i Cargo.toml
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          target: ${{ matrix.target }}
+      - name: "Build lib"
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --lib
+      - name: "Publish lib"
+        uses: actions-rs/cargo@v1
+        with:
+          command: publish
+          args: --token ${{ secrets.CRATES_TOKEN }}
       - name: "Build bin"
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release --target=${{ matrix.target }} --bin commentator --features feat-bin
+          args: --release --bin commentator --features feat-bin
+      - name: "Create release"
+        uses: softprops/action-gh-release@v1
+        with:
+          files: target/release/commentator
