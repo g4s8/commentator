@@ -1,7 +1,5 @@
 Commentator is a fucking fast source code comments finder CLI and Rust SDK (crate).
 
-**work in progress.**
-
 [![Check](https://github.com/g4s8/commentator/actions/workflows/check.yml/badge.svg)](https://github.com/g4s8/commentator/actions/workflows/check.yml)
 [![GitHub release (latest by date)](https://img.shields.io/github/downloads/g4s8/commentator/latest/total?label=download%40latest)](https://github.com/g4s8/commentator/releases/latest)
 [![Crates.io (latest)](https://img.shields.io/crates/dv/commentator?label=crates.io%40latest)](https://crates.io/crates/commentator)
