@@ -51,6 +51,31 @@ Example:
 
 ## SDK usage
 
-TODO: SDK usage
+SDK allows you to find, parse and trim comments from source code files. It's designed to be performance and memory-effecient:
+you can push source code to tokenizer line by line, and take parsed comment after each push operation, when you finish with tokenizer
+you need to notify about the end of file.
+
+See documentation for more details: https://docs.rs/commentator/0.2.3/commentator/
+
+Example:
+```rust
+let mut t = Tokenizer::new(&spec::StandardSpec::C);
+t.update(1, "/*\n");
+t.update(2, " * Entry point.\n");
+t.update(3, " */\n");
+t.update(4, "public static void main(String... args) {\n");
+t.update(5, "  System.out.println(\"hello world\");\n");
+t.update(6, "}\n");
+t.finish();
+let mut cmt = t.take().unwrap();
+cmt.trim(&spec::StandardSpec::C);
+assert_eq!(cmt.text, "Entry point.");
+assert!(t.take().is_none());
+```
 
 # References
+
+ - [github.com/jonschlinkert/extract-comments](https://github.com/jonschlinkert/extract-comments) - supports only JavaScript, not a binary, not fast.
+ - [github.com/nknapp/multilang-extract-comments](https://github.com/nknapp/multilang-extract-comments) - no all comment cases could be extracted (didn't find all comments in test files `./test-files`), not a binary tool (require `npm` and `node` to run), not fast.
+ - [tree-sitter.github.io/tree-sitter](https://tree-sitter.github.io/tree-sitter/) -too complex for this case, doesn't have a binary CLI.
+ - (feel free to submit other tools)
