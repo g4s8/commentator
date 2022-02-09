@@ -6,7 +6,7 @@ license = "MIT"
 description = "Source code comments extractor binary and SDK"
 
 [dependencies]
-unicode-segmentation = "1.8.0"
+unicode-segmentation = "1.9.0"
 json = { version = "0.12.4", optional = true }
 argparse = { version = "0.2.2", optional = true }
 
