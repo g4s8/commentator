@@ -10,6 +10,54 @@ Existing source code comments extractors (see References) forcomments extracting
 not always accurate (don't find all comments) or doesn't provide
 SDK. This tool fixes all of this.
 
+# Example
+
+```bash
+$ cat Main.java
+/*
+ * License text.
+ */
+package com.example;
+
+/**
+ * Entry point class.
+ * @since 1.0
+ */
+public class Main {
+
+    /**
+     * Main method.
+     */
+    public static void main(String... args) {
+        // TODO: run app here
+    }
+}
+
+$ commentator --format=json --lang=java --trim Main.java | jq
+[
+  {
+    "line": 1,
+    "start": 0,
+    "body": "License text."
+  },
+  {
+    "line": 6,
+    "start": 0,
+    "body": "Entry point class.\n@since 1.0"
+  },
+  {
+    "line": 12,
+    "start": 4,
+    "body": "Main method."
+  },
+  {
+    "line": 16,
+    "start": 10,
+    "body": "TODO: run app here"
+  }
+]
+```
+
 # Usage
 
  - Get crate: [crates.io/crates/commentator](https://crates.io/crates/commentator)
