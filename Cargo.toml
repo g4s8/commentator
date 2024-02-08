@@ -7,7 +7,7 @@ repository = "https://github.com/g4s8/commentator"
 description = "Source code comments extractor binary and SDK"
 
 [dependencies]
-unicode-segmentation = "1.10.1"
+unicode-segmentation = "1.11.0"
 json = { version = "0.12.4", optional = true }
 argparse = { version = "0.2.2", optional = true }
 
